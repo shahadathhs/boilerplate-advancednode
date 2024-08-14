@@ -8,7 +8,7 @@ const routes = require('./routes.js');
 const auth = require('./auth.js');
 const MongoStore = require('connect-mongo')(session);
 const passportSocketIo = require('passport.socketio');
-const cookieParser = require('cookie-parser'); // Add this line
+const cookieParser = require('cookie-parser');
 const URI = process.env.MONGO_URI;
 const store = new MongoStore({ url: URI });
 const fccTesting = require("./freeCodeCamp/fcctesting.js");
@@ -59,17 +59,27 @@ myDB(async (client) => {
     console.log('A user has connected');
     
     ++currentUsers;
-    io.emit('user count', currentUsers);
-    
-    // Listen for 'user count' event on the client-side
-    socket.on('user count', function(data) {
-      console.log(data);
+    io.emit('user', {
+      username: socket.request.user.username,
+      currentUsers,
+      connected: true
     });
-
+    
     socket.on('disconnect', () => {
       --currentUsers;
-      io.emit('user count', currentUsers);
+      io.emit('user', {
+        username: socket.request.user.username,
+        currentUsers,
+        connected: false
+      });
     });
+
+    socket.on('chat message', (data) => {
+      io.emit('chat message', {
+        username: socket.request.user.username,
+        message: data
+      });
+    })
   });
   
   routes(app, myDataBase);
