@@ -1,3 +1,5 @@
+let socket = io();
+
 $(document).ready(function () {
   // Form submittion with new message in field with id 'm'
   $('form').submit(function () {
@@ -7,4 +9,8 @@ $(document).ready(function () {
     return false; // prevent form submit from refreshing page
   });
 });
-let socket = io();
+
+
+socket.on('user count', function(data) {
+  console.log('Current user count:', data);
+});
